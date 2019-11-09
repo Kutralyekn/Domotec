@@ -1,5 +1,5 @@
 QT       += core gui
-
+qtHaveModule(printsupport): QT += printsupport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -22,8 +22,8 @@ SOURCES += \
 HEADERS += \
     mainwindow.h
 
-#FORMS += \
-#    mainwindow.ui
+FORMS += \
+    mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
