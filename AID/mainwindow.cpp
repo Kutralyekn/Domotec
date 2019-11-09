@@ -51,13 +51,13 @@ void MainWindow::createActions()
 //  VIEW MENU
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
-//    zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &ImageViewer::zoomIn);
-//    zoomInAct->setShortcut(QKeySequence::ZoomIn);
-//    zoomInAct->setEnabled(false);
-//
-//    zoomOutAct = viewMenu->addAction(tr("Zoom &Out (25%)"), this, &ImageViewer::zoomOut);
-//    zoomOutAct->setShortcut(QKeySequence::ZoomOut);
-//    zoomOutAct->setEnabled(false);
+    zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &MainWindow::zoomIn);
+    zoomInAct->setShortcut(QKeySequence::ZoomIn);
+    zoomInAct->setEnabled(false);
+
+    zoomOutAct = viewMenu->addAction(tr("Zoom &Out (25%)"), this, &MainWindow::zoomOut);
+    zoomOutAct->setShortcut(QKeySequence::ZoomOut);
+    zoomOutAct->setEnabled(false);
 
     normalSizeAct = viewMenu->addAction(tr("&Normal Size"), this, &MainWindow::normalSize);
     normalSizeAct->setShortcut(tr("Ctrl+S"));
@@ -73,7 +73,6 @@ void MainWindow::createActions()
 //  HELP MENU
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addSeparator();
-
 }
 
 bool MainWindow::loadFile(const QString &fileName)
@@ -103,17 +102,31 @@ void MainWindow::setImage(const QImage &newImage)
     image = newImage;
     imageLabel->setPixmap(QPixmap::fromImage(image));
     scaleFactor = 1.0;
-    qInfo("1");
     scrollArea->setVisible(true);
-    qInfo("1.1");
     printAct->setEnabled(true);
-    qInfo("1.2");
     fitToWindowAct->setEnabled(true);
-    qInfo("1.3");
     updateActions();
-    qInfo("2");
     if (!fitToWindowAct->isChecked())
         imageLabel->adjustSize();
+}
+
+void MainWindow::scaleImage(double factor)
+{
+    Q_ASSERT(imageLabel->pixmap());
+    scaleFactor *= factor;
+    imageLabel->resize(scaleFactor * imageLabel->pixmap()->size());
+
+    adjustScrollBar(scrollArea->horizontalScrollBar(), factor);
+    adjustScrollBar(scrollArea->verticalScrollBar(), factor);
+
+    zoomInAct->setEnabled(scaleFactor < 3.0);
+    zoomOutAct->setEnabled(scaleFactor > 0.333);
+}
+
+void MainWindow::adjustScrollBar(QScrollBar *scrollBar, double factor)
+{
+    scrollBar->setValue(int(factor * scrollBar->value()
+                            + ((factor - 1) * scrollBar->pageStep()/2)));
 }
 
 bool MainWindow::saveFile(const QString &fileName)
@@ -188,17 +201,26 @@ void MainWindow::print()
 #endif
 }
 
+void MainWindow::zoomIn()
+{
+    scaleImage(1.25);
+}
+
+void MainWindow::zoomOut()
+{
+    scaleImage(0.8);
+}
+
 void MainWindow::updateActions()
 {
     saveAsAct->setEnabled(!image.isNull());
 //    copyAct->setEnabled(!image.isNull());
-//    zoomInAct->setEnabled(!fitToWindowAct->isChecked());
-//    zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
-//    normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
+    zoomInAct->setEnabled(!fitToWindowAct->isChecked());
+    zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
+    normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
 }
 
 void MainWindow::normalSize()
-
 {
     imageLabel->adjustSize();
     scaleFactor = 1.0;

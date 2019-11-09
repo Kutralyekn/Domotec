@@ -29,6 +29,8 @@ private slots:
     void open();
     void saveAs();
     void print();
+    void zoomIn();
+    void zoomOut();
     void normalSize();
     void fitToWindow();
 
@@ -37,6 +39,8 @@ private:
     void updateActions();
     void setImage(const QImage &newImage);
     bool saveFile(const QString &fileName);
+    void scaleImage(double factor);
+    void adjustScrollBar(QScrollBar *scrollBar, double factor);
 
     Ui::MainWindow *ui;
     QImage image;
